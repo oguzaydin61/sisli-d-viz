@@ -13,7 +13,7 @@ import ExchangeTable, { ExchangeTableRef } from '@/components/ExchangeTable';
 import LiveRatesBoard from '@/components/LiveRatesBoard';
 import ThermalReceiptModal from '@/components/ThermalReceiptModal';
 import CashChangeModal from '@/components/CashChangeModal';
-import PrintReceipt from '@/components/PrintReceipt';
+import { printTransactionReceipt } from '@/lib/receipt-print';
 import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
 import {
   ArrowDownLeft,
@@ -57,9 +57,6 @@ export default function CashierPage() {
   // Son kaydedilen işlem (önizleme / yeniden yazdırma)
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
-
-  // F4 doğrudan yazdırma yükü (fiş ekran dışı render edilir)
-  const [printTx, setPrintTx] = useState<Transaction | null>(null);
 
   // F7 para üstü modalı
   const [isChangeModalOpen, setIsChangeModalOpen] = useState<boolean>(false);
@@ -148,8 +145,8 @@ export default function CashierPage() {
       if (json.data.cashbox) setCashbox(json.data.cashbox);
 
       if (printReceipt) {
-        // F4: Fiş ekran dışı render edilir, aşağıdaki effect window.print() tetikler
-        setPrintTx(savedTx);
+        // F4: izole iframe belgesi olarak yazdır (tek sayfa 70x100mm, tek fiş)
+        printTransactionReceipt(savedTx);
         showToast('success', `${savedTx.id} kaydedildi • Fiş yazdırılıyor...`);
       } else {
         // F1: Fişsiz kayıt (modal açılmaz)
@@ -163,20 +160,6 @@ export default function CashierPage() {
       setSubmitting(false);
     }
   };
-
-  // F4 doğrudan yazdırma: fiş DOM'a yerleştikten sonra print diyaloğunu aç
-  useEffect(() => {
-    if (!printTx) return;
-    const openPrint = setTimeout(() => {
-      document.body.classList.add('printing-receipt');
-      window.print();
-      setTimeout(() => {
-        document.body.classList.remove('printing-receipt');
-        setPrintTx(null);
-      }, 500);
-    }, 200);
-    return () => clearTimeout(openPrint);
-  }, [printTx]);
 
   const anyModalOpen = isChangeModalOpen || isPreviewOpen;
 
@@ -486,9 +469,6 @@ export default function CashierPage() {
         }}
         transaction={lastTransaction}
       />
-
-      {/* F4: Fiş portal ile body seviyesinde basılır (tek sayfa, tek fiş) */}
-      {printTx && <PrintReceipt transaction={printTx} />}
 
       {/* Toast Bildirimi */}
       {toast && (

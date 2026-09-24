@@ -18,50 +18,12 @@ body {
 }
 
 /* ============================================================
-   FİŞ YAZDIRMA — 70x100mm TEK SAYFA
-   Yöntem: Fiş React Portal ile body'nin doğrudan çocuğu olarak
-   basılır (.print-root). Yazdırmada uygulamanın geri kalanı
-   display:none ile kapatılır -> yer kaplamaz, tek sayfa, tek fiş.
+   FİŞ YAZDIRMA
+   Fiş artık izole bir iframe belgesi olarak üretilip yazdırılır
+   (lib/receipt-print.ts). Uygulama CSS'i yazdırmaya karışmaz;
+   @page (70x100mm) tanımı iframe belgesinin içindedir.
    ============================================================ */
-.print-root {
-  display: none; /* Ekranda asla görünmez, sadece yazdırmada açılır */
-}
-
 @media print {
-  @page {
-    margin: 0;
-    size: 70mm 100mm; /* Sabit kağıt: 70mm genişlik x 100mm yükseklik, tek sayfa */
-  }
-
-  body {
-    background: #ffffff !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  /* Uygulama kökünü tamamen kapat (yer kaplamaz -> sayfa çoğalmaz) */
-  body.printing-receipt > *:not(.print-root) {
-    display: none !important;
-  }
-
-  body.printing-receipt .print-root {
-    display: block !important;
-  }
-
-  body.printing-receipt .receipt-print-container {
-    position: static; /* fixed KULLANMA: her sayfada tekrar basılır */
-    width: 70mm;
-    max-height: 100mm;
-    overflow: hidden;
-    margin: 0;
-    padding: 1.5mm 3mm;
-    background: #ffffff !important;
-    color: #000000 !important;
-    box-shadow: none !important;
-    border: none !important;
-  }
-
-  /* Hide buttons and interactive controls on any print */
   .no-print {
     display: none !important;
   }
