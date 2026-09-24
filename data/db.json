@@ -1,0 +1,588 @@
+{
+  "currencies": [
+    {
+      "code": "USD",
+      "title": "Amerikan Doları",
+      "buy": 34.255,
+      "sell": 34.4
+    },
+    {
+      "code": "EUR",
+      "title": "Avrupa Euro",
+      "buy": 37.12,
+      "sell": 37.28
+    },
+    {
+      "code": "GBP",
+      "title": "İngiliz Sterlini",
+      "buy": 44.8,
+      "sell": 45.1
+    },
+    {
+      "code": "CAD",
+      "title": "Kanada Doları",
+      "buy": 25.1,
+      "sell": 25.4
+    },
+    {
+      "code": "CHF",
+      "title": "İsviçre Frangı",
+      "buy": 57,
+      "sell": 58
+    },
+    {
+      "code": "CYK",
+      "title": "Çeyrek Altın",
+      "buy": 11000,
+      "sell": 11100
+    }
+  ],
+  "cashbox": {
+    "TRY": -18722.1,
+    "USD": 520,
+    "EUR": 0,
+    "GBP": 0,
+    "CAD": 0,
+    "CHF": 0,
+    "CYK": 0
+  },
+  "transactions": [
+    {
+      "id": "#004845",
+      "date": "2026-09-23T16:46:37.615Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 10,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 342.55
+        }
+      ],
+      "grandTotalTRY": 342.55,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004844",
+      "date": "2026-09-23T16:44:38.753Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 100,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 3425.5
+        }
+      ],
+      "grandTotalTRY": 3425.5,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004843",
+      "date": "2026-09-23T16:42:09.071Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 10,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 342.55
+        }
+      ],
+      "grandTotalTRY": 342.55,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004842",
+      "date": "2026-09-23T16:41:52.600Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 10,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 342.55
+        }
+      ],
+      "grandTotalTRY": 342.55,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004841",
+      "date": "2026-09-23T16:41:30.540Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 10,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 342.55
+        }
+      ],
+      "grandTotalTRY": 342.55,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004840",
+      "date": "2026-09-23T16:41:19.967Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 10,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 342.55
+        }
+      ],
+      "grandTotalTRY": 342.55,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004839",
+      "date": "2026-09-23T16:40:57.518Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 10,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 342.55
+        }
+      ],
+      "grandTotalTRY": 342.55,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004838",
+      "date": "2026-09-23T16:40:41.433Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 10,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 342.55
+        }
+      ],
+      "grandTotalTRY": 342.55,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004837",
+      "date": "2026-09-23T16:39:28.513Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 100,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 3425.5
+        }
+      ],
+      "grandTotalTRY": 3425.5,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004836",
+      "date": "2026-09-23T16:38:44.740Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 10,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 342.55
+        }
+      ],
+      "grandTotalTRY": 342.55,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004835",
+      "date": "2026-09-23T16:36:32.815Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 10,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 342.55
+        }
+      ],
+      "grandTotalTRY": 342.55,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004834",
+      "date": "2026-09-23T16:35:07.126Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 10,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 342.55
+        }
+      ],
+      "grandTotalTRY": 342.55,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004833",
+      "date": "2026-09-23T16:34:07.321Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 10,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 342.55
+        }
+      ],
+      "grandTotalTRY": 342.55,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004832",
+      "date": "2026-09-23T16:29:57.689Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 10,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 342.55
+        }
+      ],
+      "grandTotalTRY": 342.55,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004831",
+      "date": "2026-09-23T16:22:24.611Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 100,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 3425.5
+        }
+      ],
+      "grandTotalTRY": 3425.5,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004830",
+      "date": "2026-09-22T19:26:42.687Z",
+      "type": "CROSS",
+      "items": [],
+      "grandTotalTRY": 4480,
+      "cross": {
+        "fromCode": "GBP",
+        "fromAmount": 100,
+        "fromRate": 44.8,
+        "toCode": "USD",
+        "toAmount": 100,
+        "toRate": 44.8,
+        "crossRate": 1
+      },
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004829",
+      "date": "2026-09-22T19:25:56.984Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "GBP",
+          "title": "İngiliz Sterlini",
+          "amount": 100,
+          "rate": 44.8,
+          "standardRate": 44.8,
+          "isNegotiated": false,
+          "totalTRY": 4480
+        }
+      ],
+      "grandTotalTRY": 4480,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004828",
+      "date": "2026-09-22T19:23:38.718Z",
+      "type": "SELL",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 1000,
+          "rate": 34.4,
+          "standardRate": 34.4,
+          "isNegotiated": false,
+          "totalTRY": 34400
+        }
+      ],
+      "grandTotalTRY": 34400,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004827",
+      "date": "2026-09-22T19:22:52.811Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 1000,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 34255
+        }
+      ],
+      "grandTotalTRY": 34255,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004826",
+      "date": "2026-09-22T19:16:56.117Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 100,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 3425.5
+        }
+      ],
+      "grandTotalTRY": 3425.5,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004825",
+      "date": "2026-09-22T19:12:44.704Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 100,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 3425.5
+        }
+      ],
+      "grandTotalTRY": 3425.5,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004824",
+      "date": "2026-09-22T19:03:21.002Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 100,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 3425.5
+        }
+      ],
+      "grandTotalTRY": 3425.5,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004823",
+      "date": "2026-09-22T19:00:20.296Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 100,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 3425.5
+        }
+      ],
+      "grandTotalTRY": 3425.5,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
+    {
+      "id": "#004822",
+      "date": "2026-09-22T18:59:50.716Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 100,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 3425.5
+        }
+      ],
+      "grandTotalTRY": 3425.5,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    }
+  ],
+  "expenses": [
+    {
+      "id": "EXP-00006",
+      "date": "2026-09-22T19:21:38.129Z",
+      "direction": "OUT",
+      "currency": "CHF",
+      "amount": 450,
+      "category": "Diğer",
+      "notes": ""
+    },
+    {
+      "id": "EXP-00005",
+      "date": "2026-09-22T19:21:07.810Z",
+      "direction": "OUT",
+      "currency": "USD",
+      "amount": 9350,
+      "category": "Diğer",
+      "notes": ""
+    },
+    {
+      "id": "EXP-00004",
+      "date": "2026-09-22T19:20:43.447Z",
+      "direction": "OUT",
+      "currency": "TRY",
+      "amount": 81372.5,
+      "category": "Diğer",
+      "notes": ""
+    },
+    {
+      "id": "EXP-00003",
+      "date": "2026-09-22T14:52:21.391Z",
+      "direction": "IN",
+      "currency": "CHF",
+      "amount": 450,
+      "category": "Diğer",
+      "notes": ""
+    },
+    {
+      "id": "EXP-00002",
+      "date": "2026-09-22T14:51:32.568Z",
+      "direction": "IN",
+      "currency": "USD",
+      "amount": 8850,
+      "category": "Diğer",
+      "notes": ""
+    },
+    {
+      "id": "EXP-00001",
+      "date": "2026-09-22T14:51:22.074Z",
+      "direction": "IN",
+      "currency": "TRY",
+      "amount": 98500,
+      "category": "Diğer",
+      "notes": ""
+    }
+  ],
+  "lastReceiptNumber": 4845,
+  "lastExpenseNumber": 6
+}
