@@ -55,16 +55,20 @@ export function buildReceiptHtml(tx: Transaction): string {
 <style>
   @page { size: 70mm 100mm; margin: 0; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { background: #fff; }
-  body {
+  html, body {
+    background: #fff;
     width: 70mm;
-    max-height: 100mm;
-    overflow: hidden;
-    padding: 1.5mm 3mm;
+    height: 100mm;
+    overflow: hidden; /* TEK SAYFA GARANTİSİ: taşan içerik 2. sayfaya asla geçmez */
+  }
+  body {
+    padding: 1.2mm 3mm;
     font-family: "Courier New", Courier, monospace;
     color: #000;
     font-size: 9px;
-    line-height: 1.3;
+    line-height: 1.2;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
   .row { display: flex; justify-content: space-between; align-items: baseline; }
   .center { text-align: center; }
