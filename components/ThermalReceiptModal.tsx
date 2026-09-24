@@ -5,6 +5,7 @@ import { Printer, X, Check, Copy } from 'lucide-react';
 import { Transaction } from '@/lib/types';
 import { formatCurrency, formatNumber, formatRate, numberToTurkishText } from '@/lib/currency';
 import ReceiptPrintView from './ReceiptPrintView';
+import PrintReceipt from './PrintReceipt';
 
 interface ThermalReceiptModalProps {
   isOpen: boolean;
@@ -80,6 +81,8 @@ ${numberToTurkishText(transaction.grandTotalTRY)}
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+      {/* Yazdırma her zaman body seviyesindeki portaldan yapılır (tek sayfa/tek fiş) */}
+      <PrintReceipt transaction={transaction} />
       <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col max-h-[95vh] animate-in fade-in zoom-in-95">
         {/* Modal Controls Bar */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-slate-950 no-print">

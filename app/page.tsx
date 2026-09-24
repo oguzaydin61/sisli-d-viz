@@ -13,7 +13,7 @@ import ExchangeTable, { ExchangeTableRef } from '@/components/ExchangeTable';
 import LiveRatesBoard from '@/components/LiveRatesBoard';
 import ThermalReceiptModal from '@/components/ThermalReceiptModal';
 import CashChangeModal from '@/components/CashChangeModal';
-import ReceiptPrintView from '@/components/ReceiptPrintView';
+import PrintReceipt from '@/components/PrintReceipt';
 import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
 import {
   ArrowDownLeft,
@@ -487,12 +487,8 @@ export default function CashierPage() {
         transaction={lastTransaction}
       />
 
-      {/* F4: Ekran dışı fiş renderı (yalnızca yazdırma anında görünür) */}
-      {printTx && (
-        <div className="fixed -left-[9999px] top-0 pointer-events-none" aria-hidden="true">
-          <ReceiptPrintView transaction={printTx} />
-        </div>
-      )}
+      {/* F4: Fiş portal ile body seviyesinde basılır (tek sayfa, tek fiş) */}
+      {printTx && <PrintReceipt transaction={printTx} />}
 
       {/* Toast Bildirimi */}
       {toast && (

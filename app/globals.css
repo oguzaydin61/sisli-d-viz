@@ -17,7 +17,16 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Thermal receipt print styles — 70x100mm tek sayfa */
+/* ============================================================
+   FİŞ YAZDIRMA — 70x100mm TEK SAYFA
+   Yöntem: Fiş React Portal ile body'nin doğrudan çocuğu olarak
+   basılır (.print-root). Yazdırmada uygulamanın geri kalanı
+   display:none ile kapatılır -> yer kaplamaz, tek sayfa, tek fiş.
+   ============================================================ */
+.print-root {
+  display: none; /* Ekranda asla görünmez, sadece yazdırmada açılır */
+}
+
 @media print {
   @page {
     margin: 0;
@@ -26,25 +35,21 @@ body {
 
   body {
     background: #ffffff !important;
-    color: #000000 !important;
     margin: 0 !important;
     padding: 0 !important;
   }
 
-  /* Hide everything except the thermal receipt when receipt print is active */
-  body.printing-receipt * {
-    visibility: hidden;
+  /* Uygulama kökünü tamamen kapat (yer kaplamaz -> sayfa çoğalmaz) */
+  body.printing-receipt > *:not(.print-root) {
+    display: none !important;
   }
 
-  body.printing-receipt .receipt-print-container,
-  body.printing-receipt .receipt-print-container * {
-    visibility: visible;
+  body.printing-receipt .print-root {
+    display: block !important;
   }
 
   body.printing-receipt .receipt-print-container {
-    position: fixed;
-    left: 0;
-    top: 0;
+    position: static; /* fixed KULLANMA: her sayfada tekrar basılır */
     width: 70mm;
     max-height: 100mm;
     overflow: hidden;
@@ -54,27 +59,6 @@ body {
     color: #000000 !important;
     box-shadow: none !important;
     border: none !important;
-  }
-
-  /* When printing general report */
-  body.printing-report * {
-    visibility: hidden;
-  }
-
-  body.printing-report .report-print-container,
-  body.printing-report .report-print-container * {
-    visibility: visible;
-  }
-
-  body.printing-report .report-print-container {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 20px;
-    background: #ffffff !important;
-    color: #000000 !important;
   }
 
   /* Hide buttons and interactive controls on any print */
