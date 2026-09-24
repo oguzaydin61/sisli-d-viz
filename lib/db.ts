@@ -61,21 +61,34 @@ export function runWithLock<T>(fn: () => Promise<T>): Promise<T> {
 //   veya UPSTASH_REDIS_REST_URL / _TOKEN          (Upstash entegrasyonu)
 // Tanımlı değilse proje kökündeki data/db.json'a yazılır.
 // ============================================================
-const REMOTE_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-const REMOTE_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-const USE_REMOTE = Boolean(REMOTE_URL && REMOTE_TOKEN);
 const REMOTE_KEY = 'bimay_fx_db';
 
-async function remoteRead(): Promise<DatabaseSchema | null> {
+interface RemoteConfig {
+  url: string;
+  token: string;
+}
+
+// Ortam değişkenleri her çağrıda taze okunur (serverless cold-start uyumlu)
+function getRemoteConfig(): RemoteConfig | null {
+  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (url && token) return { url, token };
+  return null;
+}
+
+const MISSING_REMOTE_ERROR =
+  'Veritabanı yapılandırılmamış: Vercel > Storage üzerinden Upstash Redis oluşturup projeye bağlayın ve yeniden deploy edin. (KV_REST_API_URL / KV_REST_API_TOKEN eksik)';
+
+async function remoteRead(cfg: RemoteConfig): Promise<DatabaseSchema | null> {
   const { Redis } = await import('@upstash/redis');
-  const redis = new Redis({ url: REMOTE_URL as string, token: REMOTE_TOKEN as string });
+  const redis = new Redis({ url: cfg.url, token: cfg.token });
   const data = await redis.get<DatabaseSchema>(REMOTE_KEY);
   return data ?? null;
 }
 
-async function remoteWrite(data: DatabaseSchema): Promise<void> {
+async function remoteWrite(cfg: RemoteConfig, data: DatabaseSchema): Promise<void> {
   const { Redis } = await import('@upstash/redis');
-  const redis = new Redis({ url: REMOTE_URL as string, token: REMOTE_TOKEN as string });
+  const redis = new Redis({ url: cfg.url, token: cfg.token });
   await redis.set(REMOTE_KEY, data);
 }
 
@@ -105,20 +118,27 @@ async function ensureDbExists(): Promise<void> {
 }
 
 export async function readDb(): Promise<DatabaseSchema> {
+  const remoteCfg = getRemoteConfig();
+
   // === UZAK DEPOLAMA (Vercel / Upstash Redis) ===
-  if (USE_REMOTE) {
+  if (remoteCfg) {
     try {
-      const remote = await remoteRead();
+      const remote = await remoteRead(remoteCfg);
       if (!remote) {
         // İlk çalıştırma: varsayılan veri setiyle tohumla
-        await remoteWrite(DEFAULT_DB);
+        await remoteWrite(remoteCfg, DEFAULT_DB);
         return DEFAULT_DB;
       }
       return normalizeDb(remote);
     } catch (error) {
-      console.error('Remote DB read error, returning defaults:', error);
-      return DEFAULT_DB;
+      console.error('Remote DB read error:', error);
+      throw new Error('Uzak veritabanına (Redis) bağlanılamadı. Yapılandırmayı kontrol edin.');
     }
+  }
+
+  // Vercel'de Redis yapılandırılmamışsa dosya sistemi salt-okunurdur: net hata ver
+  if (process.env.VERCEL) {
+    throw new Error(MISSING_REMOTE_ERROR);
   }
 
   // === YEREL DOSYA (geliştirme ortamı) ===
@@ -133,9 +153,13 @@ export async function readDb(): Promise<DatabaseSchema> {
 }
 
 export async function writeDb(data: DatabaseSchema): Promise<void> {
-  if (USE_REMOTE) {
-    await remoteWrite(data);
+  const remoteCfg = getRemoteConfig();
+  if (remoteCfg) {
+    await remoteWrite(remoteCfg, data);
     return;
+  }
+  if (process.env.VERCEL) {
+    throw new Error(MISSING_REMOTE_ERROR);
   }
   await ensureDbExists();
   const tempFile = `${DB_FILE}.${Date.now()}.${Math.random().toString(36).substring(2, 7)}.tmp`;
