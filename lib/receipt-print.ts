@@ -1,131 +1,220 @@
 'use client';
 
 import { Transaction } from './types';
-import { formatCurrency, formatNumber, formatRate, numberToTurkishText } from './currency';
+import { formatNumber, formatRate } from './currency';
 
 const esc = (s: string) =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 
 /**
- * 70x100mm tek sayfa fişi, tamamen bağımsız bir HTML belgesi olarak üretir.
- * Uygulamanın hiçbir CSS'i bu belgeye karışmaz.
+ * Fiş içeriği:
+ * En üstte: HESAP PUSULASI
+ * Üstte: Tarih ve Saat
+ * Alt kısım: Kenarlıksız ama hizalı tablo (Doviz, Miktari, Alis Kuru / Satis Kuru, TL Karsiligi)
+ * Minimum 4 satır veri boşluğu (boş olanlar ---)
+ * En altta: Çizgi ve TL Toplam
+ * Türkçe karakter ve sembol yok.
  */
-export function buildReceiptHtml(tx: Transaction): string {
-  const date = new Date(tx.date).toLocaleString('tr-TR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+export function buildReceiptHtml(
+  tx: Transaction,
+  paperWidth: '80mm' | '58mm' = '80mm'
+): string {
+  const rateLabel = tx.type === 'SELL' ? 'Satis Kuru' : 'Alis Kuru';
 
-  const typeLabel =
-    tx.type === 'BUY'
-      ? 'DÖVİZ ALIŞ (BİZ ALDIK)'
-      : tx.type === 'SELL'
-      ? 'DÖVİZ SATIŞ (BİZ SATTIK)'
-      : 'DÖVİZ TAKAS (CROSS)';
+  const d = new Date(tx.date);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const seconds = String(d.getSeconds()).padStart(2, '0');
+  const formattedDate = `${day}.${month}.${year}`;
+  const formattedTime = `${hours}:${minutes}:${seconds}`;
 
-  let itemsHtml = '';
-  if (tx.type === 'CROSS' && tx.cross) {
-    itemsHtml = `
-      <div class="row bold"><span>VERİLEN:</span><span>${formatNumber(tx.cross.fromAmount)} ${esc(tx.cross.fromCode)}</span></div>
-      <div class="row small"><span>Kur: ${formatRate(tx.cross.fromRate)} TL</span><span></span></div>
-      <div class="row bold"><span>ALINAN:</span><span>${formatNumber(tx.cross.toAmount)} ${esc(tx.cross.toCode)}</span></div>
-      <div class="row small"><span>Kur: ${formatRate(tx.cross.toRate)} TL</span><span>1 ${esc(tx.cross.fromCode)} = ${formatRate(tx.cross.crossRate)} ${esc(tx.cross.toCode)}</span></div>
-      <div class="row black big total"><span>İŞLEM DEĞERİ:</span><span>${formatCurrency(tx.grandTotalTRY, 'TRY')}</span></div>`;
-  } else {
-    itemsHtml =
-      tx.items
-        .map(
-          (item) => `
-      <div class="row bold" style="font-size:10px"><span>${esc(item.code)} - ${esc(item.title)}</span><span>${formatNumber(item.amount)}</span></div>
-      <div class="row small"><span>Kur: ${formatRate(item.rate)}${item.isNegotiated ? ' (P)' : ''}</span><span class="bold" style="color:#000">${formatCurrency(item.totalTRY, 'TRY')}</span></div>`
-        )
-        .join('') +
-      `
-      <div class="row black big total"><span>GENEL TOPLAM:</span><span>${formatCurrency(tx.grandTotalTRY, 'TRY')}</span></div>`;
+  // Satırları oluştur (Minimum 4 satır garantisi)
+  interface RowItem {
+    doviz: string;
+    miktar: string;
+    kur: string;
+    tl: string;
   }
+
+  const rows: RowItem[] = [];
+
+  if (tx.type === 'CROSS' && tx.cross) {
+    rows.push({
+      doviz: tx.cross.fromCode,
+      miktar: formatNumber(tx.cross.fromAmount),
+      kur: formatRate(tx.cross.fromRate),
+      tl: formatNumber(tx.grandTotalTRY)
+    });
+  } else if (tx.items && tx.items.length > 0) {
+    tx.items.forEach((it) => {
+      rows.push({
+        doviz: it.code,
+        miktar: formatNumber(it.amount),
+        kur: formatRate(it.rate),
+        tl: formatNumber(it.totalTRY)
+      });
+    });
+  }
+
+  // Minimum 4 satır olsun, boş kalanlara --- koy
+  const MIN_ROWS = 4;
+  while (rows.length < MIN_ROWS) {
+    rows.push({
+      doviz: '---',
+      miktar: '---',
+      kur: '---',
+      tl: '---'
+    });
+  }
+
+  const rowsHtml = rows
+    .map(
+      (r) => `
+    <tr>
+      <td class="col-doviz">${esc(r.doviz)}</td>
+      <td class="col-miktar">${esc(r.miktar)}</td>
+      <td class="col-kur">${esc(r.kur)}</td>
+      <td class="col-tl">${esc(r.tl)}</td>
+    </tr>
+  `
+    )
+    .join('');
+
+  const maxWidth = paperWidth === '58mm' ? '54mm' : '72mm';
 
   return `<!DOCTYPE html>
-<html lang="tr">
+<html>
 <head>
 <meta charset="utf-8" />
-<title>Fis ${esc(tx.id)}</title>
+<title>HESAP PUSULASI</title>
 <style>
-  @page { size: 70mm 100mm; margin: 0; }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  @page {
+    size: auto;
+    margin: 0;
+  }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
   html, body {
     background: #fff;
-    width: 70mm;
-    height: 100mm;
-    overflow: hidden; /* TEK SAYFA GARANTİSİ: taşan içerik 2. sayfaya asla geçmez */
+    width: 100%;
+    color: #000;
   }
   body {
-    padding: 1.2mm 3mm;
+    padding: 6mm 4mm;
     font-family: "Courier New", Courier, monospace;
-    color: #000;
-    font-size: 9px;
-    line-height: 1.2;
+    font-size: 11px;
+    line-height: 1.4;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+    max-width: ${maxWidth};
+    margin: 0 auto;
   }
-  .row { display: flex; justify-content: space-between; align-items: baseline; }
-  .center { text-align: center; }
-  .bold { font-weight: 700; }
-  .black { font-weight: 900; }
-  .big { font-size: 11px; }
-  .small { font-size: 8px; color: #444; }
-  .tiny { font-size: 7px; color: #444; }
-  .b { border-bottom: 1px dashed #666; padding-bottom: 4px; margin-bottom: 4px; }
-  .total { border-top: 1px dashed #666; margin-top: 2px; padding-top: 3px; }
-  .banner { background: #eee; border: 1px solid #999; text-align: center; font-weight: 700; font-size: 9px; padding: 3px 2px; margin: 3px 0; }
-  .sig { display: flex; gap: 8px; text-align: center; font-size: 8px; padding-top: 4px; }
-  .sig > div { flex: 1; }
-  .sig .line { height: 14px; border-bottom: 1px dotted #666; margin-top: 2px; }
+  .title {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+  }
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    border: none;
+  }
+  .table th, .table td {
+    border: none;
+    padding: 4px 1px;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .table th {
+    font-weight: 700;
+    padding-bottom: 6px;
+  }
+  .col-doviz {
+    text-align: left;
+    width: 20%;
+  }
+  .col-miktar {
+    text-align: right;
+    width: 25%;
+  }
+  .col-kur {
+    text-align: right;
+    width: 25%;
+  }
+  .col-tl {
+    text-align: right;
+    width: 30%;
+  }
+  .total-row td {
+    border-top: 1px dashed #000 !important;
+    padding-top: 6px;
+    padding-bottom: 2px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .col-total-label {
+    text-align: left;
+  }
+  .col-total-val {
+    text-align: right;
+  }
 </style>
 </head>
 <body>
-  <div class="center b">
-    <div class="black" style="font-size:13px">BİMAY DÖVİZ A.Ş.</div>
-    <div class="small">A Grubu Yetkili Müessese • Şişli / İSTANBUL</div>
-    <div class="small">Tel: 0212 555 44 33</div>
+  <div class="title">HESAP PUSULASI</div>
+  <div class="meta">
+    <span>Tarih: ${formattedDate}</span>
+    <span>Saat: ${formattedTime}</span>
   </div>
-
-  <div class="b" style="padding:4px 0">
-    <div class="row black" style="font-size:10px"><span>FİŞ NO:</span><span>${esc(tx.id)}</span></div>
-    <div class="row small"><span>TARİH:</span><span>${date}</span></div>
-    <div class="row small"><span>GİŞE:</span><span>${esc(tx.operator || 'Gişe 1')}</span></div>
-  </div>
-
-  <div class="banner">★ ${typeLabel} ★</div>
-
-  <div class="b" style="padding-bottom:4px">
-    ${itemsHtml}
-  </div>
-
-  <div class="tiny center b" style="font-style:italic;font-weight:700;padding-bottom:4px">
-    ${esc(numberToTurkishText(tx.grandTotalTRY))}
-  </div>
-
-  <div class="sig b" style="padding-bottom:4px">
-    <div><div class="bold">GİŞE YETKİLİSİ</div><div class="line"></div></div>
-    <div><div class="bold">MÜŞTERİ</div><div class="line"></div></div>
-  </div>
-
-  <div class="center" style="padding-top:3px">
-    <div class="tiny">Parayı gişeden ayrılmadan sayarak teslim alınız. Bilgi fişidir.</div>
-    <div class="bold" style="font-size:8px">BİMAY DÖVİZ OTOMASYONU</div>
-  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th class="col-doviz">Doviz</th>
+        <th class="col-miktar">Miktari</th>
+        <th class="col-kur">${rateLabel}</th>
+        <th class="col-tl">TL Karsiligi</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rowsHtml}
+    </tbody>
+    <tfoot>
+      <tr class="total-row">
+        <td colspan="2" class="col-total-label">TL Toplam</td>
+        <td colspan="2" class="col-total-val">${formatNumber(tx.grandTotalTRY)}</td>
+      </tr>
+    </tfoot>
+  </table>
 </body>
 </html>`;
 }
 
 /**
  * Fişi izole bir iframe belgesine yazıp yalnızca o belgeyi yazdırır.
- * Uygulama DOM'u ve CSS'i yazdırmaya asla karışmaz -> tek sayfa, tek fiş.
  */
-export function printTransactionReceipt(tx: Transaction): void {
+export function printTransactionReceipt(
+  tx: Transaction,
+  paperWidth: '80mm' | '58mm' = '80mm'
+): void {
   const iframe = document.createElement('iframe');
   iframe.style.cssText =
     'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;';
@@ -139,7 +228,7 @@ export function printTransactionReceipt(tx: Transaction): void {
   }
 
   doc.open();
-  doc.write(buildReceiptHtml(tx));
+  doc.write(buildReceiptHtml(tx, paperWidth));
   doc.close();
 
   setTimeout(() => {

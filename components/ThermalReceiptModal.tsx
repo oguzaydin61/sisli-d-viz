@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Printer, X, Check, Copy } from 'lucide-react';
 import { Transaction } from '@/lib/types';
-import { formatCurrency, formatNumber, formatRate, numberToTurkishText } from '@/lib/currency';
+import { formatNumber, formatRate } from '@/lib/currency';
 import ReceiptPrintView from './ReceiptPrintView';
 import { printTransactionReceipt } from '@/lib/receipt-print';
 
@@ -18,58 +18,77 @@ export default function ThermalReceiptModal({
   onClose,
   transaction
 }: ThermalReceiptModalProps) {
-  const [paperWidth, setPaperWidth] = useState<'70mm' | '58mm'>('70mm');
+  const [paperWidth, setPaperWidth] = useState<'80mm' | '58mm'>('80mm');
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen || !transaction) return null;
 
   const handlePrint = () => {
-    // İzole iframe belgesi olarak yazdır: tek sayfa (70x100mm), tek fiş
-    printTransactionReceipt(transaction);
+    printTransactionReceipt(transaction, paperWidth);
   };
 
-  const formattedDate = new Date(transaction.date).toLocaleString('tr-TR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  });
-
   const handleCopyText = () => {
-    const lines = transaction.cross
-      ? `VERİLEN: ${formatNumber(transaction.cross.fromAmount)} ${transaction.cross.fromCode} @ ${formatRate(transaction.cross.fromRate)} TL\nALINAN : ${formatNumber(transaction.cross.toAmount)} ${transaction.cross.toCode} @ ${formatRate(transaction.cross.toRate)} TL\nÇAPRAZ : 1 ${transaction.cross.fromCode} = ${formatRate(transaction.cross.crossRate)} ${transaction.cross.toCode}`
-      : transaction.items
-          .map(
-            (it) =>
-              `${it.code} (${it.title}): ${formatNumber(it.amount)} @ ${formatRate(it.rate)} TL = ${formatCurrency(it.totalTRY, 'TRY')}`
-          )
-          .join('\n');
+    const rateLabel = transaction.type === 'SELL' ? 'Satis Kuru' : 'Alis Kuru';
+    const d = new Date(transaction.date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const seconds = String(d.getSeconds()).padStart(2, '0');
+    const formattedDate = `${day}.${month}.${year}`;
+    const formattedTime = `${hours}:${minutes}:${seconds}`;
 
-    const typeLabel =
-      transaction.type === 'BUY'
-        ? 'DÖVİZ ALIŞ'
-        : transaction.type === 'SELL'
-        ? 'DÖVİZ SATIŞ'
-        : 'DÖVİZ TAKAS';
+    const rows: { doviz: string; miktar: string; kur: string; tl: string }[] = [];
 
-    const text = `
-=================================
-       SİSLİ DÖVİZ A.Ş.
-   A Grubu Yetkili Müessese
-=================================
-Fiş No   : ${transaction.id}
-Tarih    : ${formattedDate}
-İşlem    : ${typeLabel}
-Gişe     : ${transaction.operator}
----------------------------------
-${lines}
----------------------------------
-GENEL TOPLAM : ${formatCurrency(transaction.grandTotalTRY, 'TRY')}
-${numberToTurkishText(transaction.grandTotalTRY)}
-=================================
-`.trim();
+    if (transaction.type === 'CROSS' && transaction.cross) {
+      rows.push({
+        doviz: transaction.cross.fromCode,
+        miktar: formatNumber(transaction.cross.fromAmount),
+        kur: formatRate(transaction.cross.fromRate),
+        tl: formatNumber(transaction.grandTotalTRY)
+      });
+    } else if (transaction.items && transaction.items.length > 0) {
+      transaction.items.forEach((it) => {
+        rows.push({
+          doviz: it.code,
+          miktar: formatNumber(it.amount),
+          kur: formatRate(it.rate),
+          tl: formatNumber(it.totalTRY)
+        });
+      });
+    }
+
+    while (rows.length < 4) {
+      rows.push({
+        doviz: '---',
+        miktar: '---',
+        kur: '---',
+        tl: '---'
+      });
+    }
+
+    const tableText = rows
+      .map(
+        (r) =>
+          `${r.doviz.padEnd(8)} ${r.miktar.padStart(10)} ${r.kur.padStart(12)} ${r.tl.padStart(14)}`
+      )
+      .join('\n');
+
+    const separator = '-------------------------------------------------';
+    const totalLine = `${'TL Toplam'.padEnd(30)} ${formatNumber(transaction.grandTotalTRY).padStart(18)}`;
+
+    const text = `HESAP PUSULASI\nTarih: ${formattedDate}   Saat: ${formattedTime}\n\n${'Doviz'.padEnd(8)} ${'Miktari'.padStart(10)} ${rateLabel.padStart(12)} ${'TL Karsiligi'.padStart(14)}\n${tableText}\n${separator}\n${totalLine}`;
 
     navigator.clipboard.writeText(text);
     setCopied(true);
@@ -81,22 +100,22 @@ ${numberToTurkishText(transaction.grandTotalTRY)}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col max-h-[95vh] animate-in fade-in zoom-in-95">
         {/* Modal Controls Bar */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-slate-950 no-print">
-          <div className="flex items-center gap-2 text-white font-bold text-sm">
+          <div className="flex items-center gap-2 text-white font-bold text-sm font-mono">
             <Printer className="w-4 h-4 text-emerald-400" />
-            <span>Termal Fiş Önizleme & Yazdırma</span>
+            <span>HESAP PUSULASI</span>
           </div>
 
           <div className="flex items-center gap-2">
             <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-xs font-mono">
               <button
-                onClick={() => setPaperWidth('70mm')}
+                onClick={() => setPaperWidth('80mm')}
                 className={`px-2.5 py-1 rounded transition-colors ${
-                  paperWidth === '70mm'
+                  paperWidth === '80mm'
                     ? 'bg-emerald-600 text-white font-bold'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                70mm
+                80mm
               </button>
               <button
                 onClick={() => setPaperWidth('58mm')}
