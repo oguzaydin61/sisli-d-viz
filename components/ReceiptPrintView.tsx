@@ -14,7 +14,7 @@ export default function ReceiptPrintView({
   paperWidth = '80mm'
 }: ReceiptPrintViewProps) {
   const rateLabel = transaction.type === 'SELL' ? 'Satis Kuru' : 'Alis Kuru';
-  const widthClass = paperWidth === '58mm' ? 'w-[240px]' : 'w-[290px]';
+  const widthClass = paperWidth === '58mm' ? 'w-[290px]' : 'w-[370px]';
 
   const d = new Date(transaction.date);
   const day = String(d.getDate()).padStart(2, '0');
@@ -65,43 +65,43 @@ export default function ReceiptPrintView({
 
   return (
     <div
-      className={`receipt-print-container bg-white text-black font-mono shadow-2xl p-4 border border-slate-300 ${widthClass}`}
+      className={`receipt-print-container bg-white text-black font-mono shadow-2xl p-5 border border-slate-300 ${widthClass}`}
       style={{ fontFamily: 'monospace' }}
     >
-      <div className="text-center font-bold text-[17px] mb-2 tracking-wide">
+      <div className="text-center font-bold text-[26px] mb-3 tracking-wide">
         HESAP PUSULASI
       </div>
 
-      <div className="flex justify-between text-[12px] font-bold mb-3 border-b-0 pb-1">
+      <div className="flex justify-between text-[18px] font-bold mb-4 border-b-0 pb-1">
         <span>Tarih: {formattedDate}</span>
         <span>Saat: {formattedTime}</span>
       </div>
 
-      <table className="w-full text-[12px] font-bold border-collapse border-0">
+      <table className="w-full text-[18px] font-bold border-collapse border-0">
         <thead>
           <tr className="border-0">
-            <th className="text-left py-1 w-[20%] font-bold">Doviz</th>
-            <th className="text-right py-1 w-[25%] font-bold">Miktari</th>
-            <th className="text-right py-1 w-[25%] font-bold">{rateLabel}</th>
-            <th className="text-right py-1 w-[30%] font-bold">TL Karsiligi</th>
+            <th className="text-left py-1.5 w-[20%] font-bold">Doviz</th>
+            <th className="text-right py-1.5 w-[25%] font-bold">Miktari</th>
+            <th className="text-right py-1.5 w-[25%] font-bold">{rateLabel}</th>
+            <th className="text-right py-1.5 w-[30%] font-bold">TL Karsiligi</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r, idx) => (
             <tr key={idx} className="border-0">
-              <td className="text-left py-1">{r.doviz}</td>
-              <td className="text-right py-1">{r.miktar}</td>
-              <td className="text-right py-1">{r.kur}</td>
-              <td className="text-right py-1">{r.tl}</td>
+              <td className="text-left py-1.5">{r.doviz}</td>
+              <td className="text-right py-1.5">{r.miktar}</td>
+              <td className="text-right py-1.5">{r.kur}</td>
+              <td className="text-right py-1.5">{r.tl}</td>
             </tr>
           ))}
         </tbody>
         <tfoot>
           <tr>
-            <td colSpan={2} className="text-left pt-2 pb-1 border-t border-dashed border-black font-bold text-[13px]">
+            <td colSpan={2} className="text-left pt-3 pb-1 border-t-2 border-dashed border-black font-bold text-[21px]">
               TL Toplam
             </td>
-            <td colSpan={2} className="text-right pt-2 pb-1 border-t border-dashed border-black font-bold text-[13px]">
+            <td colSpan={2} className="text-right pt-3 pb-1 border-t-2 border-dashed border-black font-bold text-[21px]">
               {formatNumber(transaction.grandTotalTRY)}
             </td>
           </tr>

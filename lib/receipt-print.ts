@@ -16,7 +16,7 @@ const esc = (s: string) =>
  * Alt kısım: Kenarlıksız ama hizalı tablo (Doviz, Miktari, Alis Kuru / Satis Kuru, TL Karsiligi)
  * Minimum 4 satır veri boşluğu (boş olanlar ---)
  * En altta: Çizgi ve TL Toplam
- * Yazı boyutu: %20 büyütüldü.
+ * Yazı boyutu: 2 kat büyütüldü.
  * Türkçe karakter ve sembol yok.
  */
 export function buildReceiptHtml(
@@ -87,7 +87,7 @@ export function buildReceiptHtml(
     )
     .join('');
 
-  const maxWidth = paperWidth === '58mm' ? '54mm' : '72mm';
+  const maxWidth = paperWidth === '58mm' ? '56mm' : '76mm';
 
   return `<!DOCTYPE html>
 <html>
@@ -110,10 +110,10 @@ export function buildReceiptHtml(
     color: #000;
   }
   body {
-    padding: 6mm 3mm;
+    padding: 6mm 2mm;
     font-family: "Courier New", Courier, monospace;
-    font-size: 13px;
-    line-height: 1.45;
+    font-size: 18px;
+    line-height: 1.4;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
     max-width: ${maxWidth};
@@ -121,17 +121,17 @@ export function buildReceiptHtml(
   }
   .title {
     text-align: center;
-    font-size: 17px;
+    font-size: 26px;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     letter-spacing: 0.5px;
   }
   .meta {
     display: flex;
     justify-content: space-between;
-    font-size: 12px;
+    font-size: 18px;
     font-weight: 700;
-    margin-bottom: 10px;
+    margin-bottom: 14px;
     padding-bottom: 4px;
   }
   .table {
@@ -141,13 +141,13 @@ export function buildReceiptHtml(
   }
   .table th, .table td {
     border: none;
-    padding: 4px 1px;
-    font-size: 12px;
+    padding: 6px 1px;
+    font-size: 18px;
     font-weight: 700;
   }
   .table th {
     font-weight: 700;
-    padding-bottom: 7px;
+    padding-bottom: 10px;
   }
   .col-doviz {
     text-align: left;
@@ -166,10 +166,10 @@ export function buildReceiptHtml(
     width: 30%;
   }
   .total-row td {
-    border-top: 1px dashed #000 !important;
-    padding-top: 7px;
-    padding-bottom: 2px;
-    font-size: 13px;
+    border-top: 2px dashed #000 !important;
+    padding-top: 10px;
+    padding-bottom: 4px;
+    font-size: 21px;
     font-weight: 700;
   }
   .col-total-label {
