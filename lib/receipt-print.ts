@@ -16,6 +16,7 @@ const esc = (s: string) =>
  * Alt kısım: Kenarlıksız ama hizalı tablo (Doviz, Miktari, Alis Kuru / Satis Kuru, TL Karsiligi)
  * Minimum 4 satır veri boşluğu (boş olanlar ---)
  * En altta: Çizgi ve TL Toplam
+ * Yazı boyutu: %20 büyütüldü.
  * Türkçe karakter ve sembol yok.
  */
 export function buildReceiptHtml(
@@ -109,10 +110,10 @@ export function buildReceiptHtml(
     color: #000;
   }
   body {
-    padding: 6mm 4mm;
+    padding: 6mm 3mm;
     font-family: "Courier New", Courier, monospace;
-    font-size: 11px;
-    line-height: 1.4;
+    font-size: 13px;
+    line-height: 1.45;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
     max-width: ${maxWidth};
@@ -120,17 +121,17 @@ export function buildReceiptHtml(
   }
   .title {
     text-align: center;
-    font-size: 14px;
+    font-size: 17px;
     font-weight: 700;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     letter-spacing: 0.5px;
   }
   .meta {
     display: flex;
     justify-content: space-between;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     padding-bottom: 4px;
   }
   .table {
@@ -141,12 +142,12 @@ export function buildReceiptHtml(
   .table th, .table td {
     border: none;
     padding: 4px 1px;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
   }
   .table th {
     font-weight: 700;
-    padding-bottom: 6px;
+    padding-bottom: 7px;
   }
   .col-doviz {
     text-align: left;
@@ -166,9 +167,9 @@ export function buildReceiptHtml(
   }
   .total-row td {
     border-top: 1px dashed #000 !important;
-    padding-top: 6px;
+    padding-top: 7px;
     padding-bottom: 2px;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 700;
   }
   .col-total-label {

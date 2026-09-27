@@ -14,7 +14,7 @@ export default function ReceiptPrintView({
   paperWidth = '80mm'
 }: ReceiptPrintViewProps) {
   const rateLabel = transaction.type === 'SELL' ? 'Satis Kuru' : 'Alis Kuru';
-  const widthClass = paperWidth === '58mm' ? 'w-[230px]' : 'w-[280px]';
+  const widthClass = paperWidth === '58mm' ? 'w-[240px]' : 'w-[290px]';
 
   const d = new Date(transaction.date);
   const day = String(d.getDate()).padStart(2, '0');
@@ -68,16 +68,16 @@ export default function ReceiptPrintView({
       className={`receipt-print-container bg-white text-black font-mono shadow-2xl p-4 border border-slate-300 ${widthClass}`}
       style={{ fontFamily: 'monospace' }}
     >
-      <div className="text-center font-bold text-[14px] mb-1.5 tracking-wide">
+      <div className="text-center font-bold text-[17px] mb-2 tracking-wide">
         HESAP PUSULASI
       </div>
 
-      <div className="flex justify-between text-[10px] font-bold mb-3 border-b-0 pb-1">
+      <div className="flex justify-between text-[12px] font-bold mb-3 border-b-0 pb-1">
         <span>Tarih: {formattedDate}</span>
         <span>Saat: {formattedTime}</span>
       </div>
 
-      <table className="w-full text-[10px] font-bold border-collapse border-0">
+      <table className="w-full text-[12px] font-bold border-collapse border-0">
         <thead>
           <tr className="border-0">
             <th className="text-left py-1 w-[20%] font-bold">Doviz</th>
@@ -98,10 +98,10 @@ export default function ReceiptPrintView({
         </tbody>
         <tfoot>
           <tr>
-            <td colSpan={2} className="text-left pt-2 pb-1 border-t border-dashed border-black font-bold text-[11px]">
+            <td colSpan={2} className="text-left pt-2 pb-1 border-t border-dashed border-black font-bold text-[13px]">
               TL Toplam
             </td>
-            <td colSpan={2} className="text-right pt-2 pb-1 border-t border-dashed border-black font-bold text-[11px]">
+            <td colSpan={2} className="text-right pt-2 pb-1 border-t border-dashed border-black font-bold text-[13px]">
               {formatNumber(transaction.grandTotalTRY)}
             </td>
           </tr>
