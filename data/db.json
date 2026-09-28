@@ -38,8 +38,8 @@
     }
   ],
   "cashbox": {
-    "TRY": -25102.25,
-    "USD": 690,
+    "TRY": -25444.8,
+    "USD": 700,
     "EUR": 15,
     "GBP": 0,
     "CAD": 0,
@@ -47,6 +47,26 @@
     "CYK": 0
   },
   "transactions": [
+    {
+      "id": "#004863",
+      "date": "2026-09-28T12:57:05.740Z",
+      "type": "BUY",
+      "items": [
+        {
+          "code": "USD",
+          "title": "Amerikan Doları",
+          "amount": 10,
+          "rate": 34.255,
+          "standardRate": 34.255,
+          "isNegotiated": false,
+          "totalTRY": 342.55
+        }
+      ],
+      "grandTotalTRY": 342.55,
+      "operator": "Gişe 1",
+      "status": "ACTIVE",
+      "notes": ""
+    },
     {
       "id": "#004862",
       "date": "2026-09-27T17:08:54.477Z",
@@ -932,6 +952,6 @@
       "notes": ""
     }
   ],
-  "lastReceiptNumber": 4862,
+  "lastReceiptNumber": 4863,
   "lastExpenseNumber": 6
 }

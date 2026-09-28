@@ -10,14 +10,8 @@ const esc = (s: string) =>
     .replace(/>/g, '&gt;');
 
 /**
- * Fiş içeriği:
- * En üstte: HESAP PUSULASI
- * Üstte: Tarih ve Saat
- * Alt kısım: Kenarlıksız ama hizalı tablo (Doviz, Miktari, Alis Kuru / Satis Kuru, TL Karsiligi)
- * Minimum 4 satır veri boşluğu (boş olanlar ---)
- * En altta: Çizgi ve TL Toplam
- * Font: İnce, net, birbirine girmeyen dengeli boyut (font-weight: normal).
- * Türkçe karakter ve sembol yok.
+ * Termal yazıcılar için optimize edilmiş fiş şablonu.
+ * Flexbox kullanılmamış, standart HTML table ve inline CSS tercih edilmiştir.
  */
 export function buildReceiptHtml(
   tx: Transaction,
@@ -35,7 +29,6 @@ export function buildReceiptHtml(
   const formattedDate = `${day}.${month}.${year}`;
   const formattedTime = `${hours}:${minutes}:${seconds}`;
 
-  // Satırları oluştur (Minimum 4 satır garantisi)
   interface RowItem {
     doviz: string;
     miktar: string;
@@ -63,7 +56,7 @@ export function buildReceiptHtml(
     });
   }
 
-  // Minimum 4 satır olsun, boş kalanlara --- koy
+  // Minimum 4 satır garantisi
   const MIN_ROWS = 4;
   while (rows.length < MIN_ROWS) {
     rows.push({
@@ -78,16 +71,17 @@ export function buildReceiptHtml(
     .map(
       (r) => `
     <tr>
-      <td class="col-doviz">${esc(r.doviz)}</td>
-      <td class="col-miktar">${esc(r.miktar)}</td>
-      <td class="col-kur">${esc(r.kur)}</td>
-      <td class="col-tl">${esc(r.tl)}</td>
+      <td style="text-align: left; padding: 2px 0;">${esc(r.doviz)}</td>
+      <td style="text-align: right; padding: 2px 0;">${esc(r.miktar)}</td>
+      <td style="text-align: right; padding: 2px 0;">${esc(r.kur)}</td>
+      <td style="text-align: right; padding: 2px 0;">${esc(r.tl)}</td>
     </tr>
   `
     )
     .join('');
 
-  const maxWidth = paperWidth === '58mm' ? '54mm' : '72mm';
+  // Sayfa genişliği sınırlandırması
+  const printWidth = paperWidth === '58mm' ? '48mm' : '72mm';
 
   return `<!DOCTYPE html>
 <html>
@@ -97,116 +91,66 @@ export function buildReceiptHtml(
 <style>
   @page {
     size: auto;
-    margin: 0;
+    margin: 0mm;
   }
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  html, body {
-    background: #fff;
-    width: 100%;
-    color: #000;
-  }
-  body {
-    padding: 6mm 3mm;
-    font-family: Consolas, "Courier New", Courier, monospace;
-    font-size: 11px;
-    font-weight: 400;
-    line-height: 1.5;
-    letter-spacing: 0.2px;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    max-width: ${maxWidth};
-    margin: 0 auto;
-  }
-  .title {
-    text-align: center;
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    letter-spacing: 0.5px;
-  }
-  .meta {
-    display: flex;
-    justify-content: space-between;
-    font-size: 10px;
-    font-weight: 400;
-    margin-bottom: 8px;
-    padding-bottom: 4px;
-  }
-  .table {
-    width: 100%;
-    border-collapse: collapse;
-    border: none;
-  }
-  .table th, .table td {
-    border: none;
-    padding: 3px 1px;
-    font-size: 10px;
-    font-weight: 400;
-  }
-  .table th {
-    font-weight: 600;
-    padding-bottom: 6px;
-  }
-  .col-doviz {
-    text-align: left;
-    width: 20%;
-  }
-  .col-miktar {
-    text-align: right;
-    width: 25%;
-  }
-  .col-kur {
-    text-align: right;
-    width: 25%;
-  }
-  .col-tl {
-    text-align: right;
-    width: 30%;
-  }
-  .total-row td {
-    border-top: 1px dashed #444 !important;
-    padding-top: 6px;
-    padding-bottom: 2px;
-    font-size: 11px;
-    font-weight: 600;
-  }
-  .col-total-label {
-    text-align: left;
-  }
-  .col-total-val {
-    text-align: right;
+  @media print {
+    body {
+      width: ${printWidth};
+    }
   }
 </style>
 </head>
-<body>
-  <div class="title">HESAP PUSULASI</div>
-  <div class="meta">
-    <span>Tarih: ${formattedDate}</span>
-    <span>Saat: ${formattedTime}</span>
+<body style="
+  margin: 0 auto;
+  padding: 5mm 2mm;
+  width: ${printWidth};
+  background: #fff;
+  color: #000;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11px;
+  line-height: 1.3;
+">
+
+  <!-- BAŞLIK -->
+  <div style="text-align: center; font-size: 13px; font-weight: bold; margin-bottom: 8px;">
+    HESAP PUSULASI
   </div>
-  <table class="table">
+
+  <!-- TARİH VE SAAT (Flex yerine Standart Tablo) -->
+  <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 10px;">
+    <tr>
+      <td style="text-align: left;">Tarih: ${formattedDate}</td>
+      <td style="text-align: right;">Saat: ${formattedTime}</td>
+    </tr>
+  </table>
+
+  <div style="border-bottom: 1px dashed #000; margin-bottom: 6px;"></div>
+
+  <!-- VERİ TABLOSU -->
+  <table style="width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed;">
     <thead>
-      <tr>
-        <th class="col-doviz">Doviz</th>
-        <th class="col-miktar">Miktari</th>
-        <th class="col-kur">${rateLabel}</th>
-        <th class="col-tl">TL Karsiligi</th>
+      <tr style="font-weight: bold;">
+        <th style="text-align: left; width: 18%; padding-bottom: 4px;">Doviz</th>
+        <th style="text-align: right; width: 26%; padding-bottom: 4px;">Miktari</th>
+        <th style="text-align: right; width: 26%; padding-bottom: 4px;">${rateLabel}</th>
+        <th style="text-align: right; width: 30%; padding-bottom: 4px;">TL Karsiligi</th>
       </tr>
     </thead>
     <tbody>
       ${rowsHtml}
     </tbody>
-    <tfoot>
-      <tr class="total-row">
-        <td colspan="2" class="col-total-label">TL Toplam</td>
-        <td colspan="2" class="col-total-val">${formatNumber(tx.grandTotalTRY)}</td>
-      </tr>
-    </tfoot>
   </table>
+
+  <div style="border-bottom: 1px dashed #000; margin-top: 6px; margin-bottom: 6px;"></div>
+
+  <!-- TOPLAM TARİFİ -->
+  <table style="width: 100%; border-collapse: collapse; font-size: 11px; font-weight: bold;">
+    <tr>
+      <td style="text-align: left;">TL Toplam</td>
+      <td style="text-align: right;">${formatNumber(tx.grandTotalTRY)}</td>
+    </tr>
+  </table>
+
 </body>
 </html>`;
 }
@@ -226,7 +170,7 @@ export function printTransactionReceipt(
   const win = iframe.contentWindow;
   const doc = win?.document;
   if (!win || !doc) {
-    document.body.removeChild(iframe);
+    if (iframe.parentNode) document.body.removeChild(iframe);
     return;
   }
 
@@ -234,6 +178,7 @@ export function printTransactionReceipt(
   doc.write(buildReceiptHtml(tx, paperWidth));
   doc.close();
 
+  // Yükleme süresini termal yazıcı sürücülerinin işleyebilmesi için biraz arttırdık
   setTimeout(() => {
     try {
       win.focus();
@@ -243,5 +188,5 @@ export function printTransactionReceipt(
         if (iframe.parentNode) document.body.removeChild(iframe);
       }, 1000);
     }
-  }, 150);
+  }, 300);
 }
