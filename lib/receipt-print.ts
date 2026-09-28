@@ -9,16 +9,10 @@ const esc = (s: string) =>
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
 
-/**
- * Belirtilen uzunluğa göre metnin sağına boşluk ekler (sola hizalar)
- */
 function padRight(str: string, length: number): string {
   return str.padEnd(length, ' ').slice(0, length);
 }
 
-/**
- * Belirtilen uzunluğa göre metnin soluna boşluk ekler (sağa hizalar)
- */
 function padLeft(str: string, length: number): string {
   return str.padStart(length, ' ').slice(0, length);
 }
@@ -27,7 +21,7 @@ export function buildReceiptHtml(
   tx: Transaction,
   paperWidth: '80mm' | '58mm' = '80mm'
 ): string {
-  const rateLabel = tx.type === 'SELL' ? 'Satis Kuru' : 'Alis Kuru';
+  const rateLabel = tx.type === 'SELL' ? 'Satis' : 'Alis';
 
   const d = new Date(tx.date);
   const day = String(d.getDate()).padStart(2, '0');
@@ -39,7 +33,7 @@ export function buildReceiptHtml(
   const formattedDate = `${day}.${month}.${year}`;
   const formattedTime = `${hours}:${minutes}:${seconds}`;
 
-  // 80mm fişler standart 32 karakter genişliğindedir (58mm için 24 karakter)
+  // 80mm yazıcılar genelde 32 karakterdir. Tam oturması için 32 karakter kullanalım.
   const MAX_COLS = paperWidth === '58mm' ? 24 : 32;
 
   interface RowItem {
@@ -80,29 +74,33 @@ export function buildReceiptHtml(
     });
   }
 
-  // Sütun genişlikleri (Toplam: 32 Karakter)
-  // Doviz: 5 | Miktar: 8 | Kur: 8 | TL: 11
+  // Sütun genişlikleri toplamı: 5 + 9 + 8 + 10 = 32 Karakter
   const cDoviz = 5;
-  const cMiktar = 8;
+  const cMiktar = 9;
   const cKur = 8;
-  const cTl = 11;
+  const cTl = 10;
 
-  // 1. Header (Başlık ve Tarih)
+  // Başlık Ortala
   const headerText = 'HESAP PUSULASI';
   const headerPadding = Math.max(0, Math.floor((MAX_COLS - headerText.length) / 2));
   const centeredHeader = ' '.repeat(headerPadding) + headerText;
 
-  const dateLine = `Tarih: ${formattedDate} Saat: ${formattedTime}`;
+  // Tarih Saat (Eşit Aralıklı)
+  const dateStr = `Tarih:${formattedDate}`;
+  const timeStr = `Saat:${formattedTime}`;
+  const dateSpace = Math.max(1, MAX_COLS - dateStr.length - timeStr.length);
+  const dateLine = dateStr + ' '.repeat(dateSpace) + timeStr;
+
   const separator = '-'.repeat(MAX_COLS);
 
-  // 2. Tablo Başlıkları
+  // Tablo Başlıkları
   const tableHeader = 
     padRight('Doviz', cDoviz) +
     padLeft('Miktar', cMiktar) +
-    padLeft(rateLabel === 'Satis Kuru' ? 'Satis' : 'Alis', cKur) +
-    padLeft('TL Karsiligi', cTl);
+    padLeft(rateLabel, cKur) +
+    padLeft('TL Kars.', cTl);
 
-  // 3. Tablo Satırları
+  // Tablo Satırları
   const tableRows = rows.map(r => 
     padRight(r.doviz, cDoviz) +
     padLeft(r.miktar, cMiktar) +
@@ -110,42 +108,43 @@ export function buildReceiptHtml(
     padLeft(r.tl, cTl)
   ).join('\n');
 
-  // 4. Toplam Satırı
+  // Toplam Satırı (Garantili Hiza)
   const totalLabel = 'TL Toplam';
   const totalVal = formatNumber(tx.grandTotalTRY);
   const totalSpaces = Math.max(1, MAX_COLS - totalLabel.length - totalVal.length);
   const totalLine = totalLabel + ' '.repeat(totalSpaces) + totalVal;
 
-  // Ham metin bloğunu birleştirme
-  const rawText = [
-    centeredHeader,
-    dateLine,
-    separator,
-    tableHeader,
-    tableRows,
-    separator,
-    totalLine
-  ].join('\n');
+  // Metni eksiksiz satır satır birleştirme
+  const rawText = 
+    centeredHeader + '\n\n' +
+    dateLine + '\n' +
+    separator + '\n' +
+    tableHeader + '\n' +
+    tableRows + '\n' +
+    separator + '\n' +
+    totalLine + '\n\n\n';
 
   return `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8" />
 <style>
-  @page { margin: 0; }
-  body {
+  @page { margin: 0; size: auto; }
+  html, body {
     margin: 0;
-    padding: 5px;
+    padding: 0;
     background: #fff;
     color: #000;
   }
   pre {
     font-family: "Courier New", Courier, monospace;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: bold;
     line-height: 1.2;
     margin: 0;
+    padding: 4px;
     white-space: pre;
+    width: 100%;
   }
 </style>
 </head>
