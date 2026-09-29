@@ -117,20 +117,21 @@ export function buildReceiptHtml(tx: Transaction): string {
 <meta charset="utf-8" />
 <title>HESAP PUSULASI</title>
 <style>
-  /* 76mm roll kâğıt boyutu ve sıfır marjin */
+  /* A4 kalsa bile sayfa yüksekliğini içeriğe zorluyoruz */
   @page { 
     size: 76mm auto; 
     margin: 0; 
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { 
+    margin: 0; 
+    padding: 0; 
     background: #fff; 
     width: 76mm;
   }
   .strip {
     width: 76mm;
-    /* Üst padding 0 (kaymayı önler), alt padding kağıt besleme için */
-    padding: 0mm 2mm 15mm 2mm; 
+    /* Üst padding'i SIFIRLA! Önceki kodundaki 20mm üst padding fişi aşağı itiyordu */
+    padding: 0mm 2mm 10mm 2mm; 
     overflow: hidden;
   }
   pre {
