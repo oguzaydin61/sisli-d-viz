@@ -34,7 +34,7 @@ export default function ThermalReceiptModal({
   if (!isOpen || !transaction) return null;
 
   const handlePrint = () => {
-    printTransactionReceipt(transaction, paperWidth);
+    printTransactionReceipt(transaction);
   };
 
   const handleCopyText = () => {
