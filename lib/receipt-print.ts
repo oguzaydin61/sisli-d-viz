@@ -29,14 +29,26 @@ function rate(n: number): string {
   }).format(n);
 }
 
+// Satir genisligi (karakter). 70mm termal/dot-matrix icin guvenli deger.
+const W = 40;
+// Kolon genislikleri: 16 (miktar) + 11 (kur) + 13 (TL karsiligi) = 40
+const C1 = 16;
+const C2 = 11;
+const C3 = 13;
+
+function center(s: string): string {
+  const pad = Math.max(0, Math.floor((W - s.length) / 2));
+  return ' '.repeat(pad) + s;
+}
+
 /**
- * 70mm x 70mm tek sayfa HESAP PUSULASI.
- * Icerik: SADECE "HESAP PUSULASI" basligi + Doviz Miktari / Alis veya Satis Kuru / TL Karsiligi tablosu.
- * Ustten ve alttan 2cm bosluk birakilir; boylece son satir bir sonraki fise kaymaz.
- * Turkce karakter ve baska hicbir yazi/sembol kullanilmaz.
+ * Fisi SAF MONOSPACE METIN olarak uretir (nokta vuruslu / dot-matrix
+ * yazicilarin ana dili). Kolon hizasi karakter bosluklariyla kurulur;
+ * HTML tablo veya CSS layout kullanilmaz.
  */
-export function buildReceiptHtml(tx: Transaction): string {
+function buildReceiptText(tx: Transaction): string {
   const kurBaslik = tx.type === 'BUY' ? 'Alis Kuru' : 'Satis Kuru';
+  const sep = '-'.repeat(W);
 
   const rows =
     tx.type === 'CROSS' && tx.cross
@@ -55,16 +67,24 @@ export function buildReceiptHtml(tx: Transaction): string {
           total: it.totalTRY
         }));
 
-  const rowsHtml = rows
-    .map(
-      (r) => `
-      <tr>
-        <td>${money(r.amount)} ${ascii(r.code)}</td>
-        <td class="right">${rate(r.rate)}</td>
-        <td class="right">${money(r.total)}</td>
-      </tr>`
-    )
-    .join('');
+  const header =
+    'Doviz Miktari'.padEnd(C1) + kurBaslik.padStart(C2) + 'TL Karsiligi'.padStart(C3);
+
+  const lines = rows.map(
+    (r) =>
+      `${money(r.amount)} ${ascii(r.code)}`.padEnd(C1) +
+      rate(r.rate).padStart(C2) +
+      money(r.total).padStart(C3)
+  );
+
+  return [center('HESAP PUSULASI'), sep, header, sep, ...lines].join('\n');
+}
+
+const esc = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+export function buildReceiptHtml(tx: Transaction): string {
+  const text = buildReceiptText(tx);
 
   return `<!DOCTYPE html>
 <html lang="tr">
@@ -80,48 +100,21 @@ export function buildReceiptHtml(tx: Transaction): string {
     height: 70mm;
     overflow: hidden; /* tek sayfa: tasan icerik sonraki fise gecmez */
     padding: 20mm 3mm; /* ustten 2cm, alttan 2cm bosluk */
+  }
+  pre {
     font-family: "Courier New", Courier, monospace;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1.6;
+    white-space: pre;
     color: #000;
-    font-size: 8px;
-    line-height: 1.4;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  .title {
-    text-align: center;
-    font-weight: 900;
-    font-size: 10px;
-    letter-spacing: 1px;
-    border-bottom: 1px dashed #000;
-    padding-bottom: 1.5mm;
-    margin-bottom: 2.5mm;
-  }
-  table { width: 100%; border-collapse: collapse; }
-  th {
-    text-align: left;
-    font-weight: 900;
-    font-size: 7.5px;
-    border-bottom: 1px solid #000;
-    padding: 1mm 0;
-  }
-  td { padding: 1.4mm 0; vertical-align: top; }
-  .right { text-align: right; }
 </style>
 </head>
 <body>
-  <div class="title">HESAP PUSULASI</div>
-  <table>
-    <thead>
-      <tr>
-        <th>Doviz Miktari</th>
-        <th class="right">${ascii(kurBaslik)}</th>
-        <th class="right">TL Karsiligi</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${rowsHtml}
-    </tbody>
-  </table>
+<pre>${esc(text)}</pre>
 </body>
 </html>`;
 }
