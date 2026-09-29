@@ -117,19 +117,27 @@ export function buildReceiptHtml(tx: Transaction): string {
 <meta charset="utf-8" />
 <title>HESAP PUSULASI</title>
 <style>
-  @page { size: A4; margin: 0; }
+  /* 76mm roll kâğıt boyutu ve sıfır marjin */
+  @page { 
+    size: 76mm auto; 
+    margin: 0; 
+  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { background: #fff; }
+  html, body { 
+    background: #fff; 
+    width: 76mm;
+  }
   .strip {
-    width: 70mm;
-    padding: 20mm 4mm 20mm 4mm; /* ustten 2cm, alttan 2cm (yirtma payi) */
+    width: 76mm;
+    /* Üst padding 0 (kaymayı önler), alt padding kağıt besleme için */
+    padding: 0mm 2mm 15mm 2mm; 
     overflow: hidden;
   }
   pre {
     font-family: "Courier New", Courier, monospace;
-    font-size: 9px;
+    font-size: 9.5pt;
     font-weight: 700;
-    line-height: 1.6;
+    line-height: 1.2;
     white-space: pre;
     color: #000;
     -webkit-print-color-adjust: exact;
