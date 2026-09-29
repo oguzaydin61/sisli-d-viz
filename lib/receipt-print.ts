@@ -58,20 +58,20 @@ export function buildReceiptHtml(tx: Transaction): string {
     padding: 1.5mm 3mm;
     font-family: "Courier New", Courier, monospace;
     color: #000;
-    font-size: 9px;
+    font-size: 30px;
     line-height: 1.3;
   }
   .row { display: flex; justify-content: space-between; align-items: baseline; }
   .center { text-align: center; }
   .bold { font-weight: 700; }
   .black { font-weight: 900; }
-  .big { font-size: 11px; }
-  .small { font-size: 8px; color: #444; }
-  .tiny { font-size: 7px; color: #444; }
+  .big { font-size: 17px; }
+  .small { font-size: 14px; color: #444; }
+  .tiny { font-size: 12px; color: #444; }
   .b { border-bottom: 1px dashed #666; padding-bottom: 4px; margin-bottom: 4px; }
   .total { border-top: 1px dashed #666; margin-top: 2px; padding-top: 3px; }
   .banner { background: #eee; border: 1px solid #999; text-align: center; font-weight: 700; font-size: 9px; padding: 3px 2px; margin: 3px 0; }
-  .sig { display: flex; gap: 8px; text-align: center; font-size: 8px; padding-top: 4px; }
+  .sig { display: flex; gap: 8px; text-align: center; font-size: 12px; padding-top: 4px; }
   .sig > div { flex: 1; }
   .sig .line { height: 14px; border-bottom: 1px dotted #666; margin-top: 2px; }
 </style>
