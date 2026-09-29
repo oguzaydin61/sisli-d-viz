@@ -29,7 +29,7 @@ function rate(n: number): string {
   }).format(n);
 }
 
-// Satir genisligi (karakter). 70mm termal/dot-matrix icin guvenli deger.
+// Satir genisligi (karakter). 70mm dot-matrix/termal serit icin guvenli deger.
 const W = 40;
 // Kolon genislikleri: 16 (miktar) + 11 (kur) + 13 (TL karsiligi) = 40
 const C1 = 16;
@@ -50,22 +50,30 @@ function buildReceiptText(tx: Transaction): string {
   const kurBaslik = tx.type === 'BUY' ? 'Alis Kuru' : 'Satis Kuru';
   const sep = '-'.repeat(W);
 
-  const rows =
-    tx.type === 'CROSS' && tx.cross
-      ? [
-          {
-            code: tx.cross.fromCode,
-            amount: tx.cross.fromAmount,
-            rate: tx.cross.fromRate,
-            total: tx.cross.fromAmount * tx.cross.fromRate
-          }
-        ]
-      : tx.items.map((it) => ({
-          code: it.code,
-          amount: it.amount,
-          rate: it.rate,
-          total: it.totalTRY
-        }));
+  const d = new Date(tx.date);
+  const tarih = `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
+  const saat = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
+
+  let rows: { code: string; amount: number; rate: number; total: number }[];
+  if (tx.type === 'CROSS' && tx.cross) {
+    rows = [
+      {
+        code: tx.cross.fromCode,
+        amount: tx.cross.fromAmount,
+        rate: tx.cross.fromRate,
+        total: tx.cross.fromAmount * tx.cross.fromRate
+      }
+    ];
+  } else if (Array.isArray(tx.items)) {
+    rows = tx.items.map((it) => ({
+      code: it.code,
+      amount: it.amount,
+      rate: it.rate,
+      total: it.totalTRY
+    }));
+  } else {
+    rows = [];
+  }
 
   const header =
     'Doviz Miktari'.padEnd(C1) + kurBaslik.padStart(C2) + 'TL Karsiligi'.padStart(C3);
@@ -77,12 +85,29 @@ function buildReceiptText(tx: Transaction): string {
       money(r.total).padStart(C3)
   );
 
-  return [center('HESAP PUSULASI'), sep, header, sep, ...lines].join('\n');
+  // Guvenlik: items bos gelirse fis asla bos cikmasin
+  if (lines.length === 0) {
+    lines.push('TL Toplam'.padEnd(C1 + C2) + money(tx.grandTotalTRY || 0).padStart(C3));
+  }
+
+  return [
+    `Tarih: ${tarih}   Saat: ${saat}`,
+    center('HESAP PUSULASI'),
+    sep,
+    header,
+    sep,
+    ...lines
+  ].join('\n');
 }
 
 const esc = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+/**
+ * A4 sayfa uzerinde sol-ust 70mm serit olarak basar.
+ * (Yazici surucusunde rulo genisligi ayari olmadigi icin A4 seciliyor;
+ * yazici icerik bitince durur, 2cm alt bosluk yirtma payi birakir.)
+ */
 export function buildReceiptHtml(tx: Transaction): string {
   const text = buildReceiptText(tx);
 
@@ -92,14 +117,13 @@ export function buildReceiptHtml(tx: Transaction): string {
 <meta charset="utf-8" />
 <title>HESAP PUSULASI</title>
 <style>
-  @page { size: 70mm 70mm; margin: 0; }
+  @page { size: A4; margin: 0; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { background: #fff; }
-  body {
+  .strip {
     width: 70mm;
-    height: 70mm;
-    overflow: hidden; /* tek sayfa: tasan icerik sonraki fise gecmez */
-    padding: 20mm 3mm; /* ustten 2cm, alttan 2cm bosluk */
+    padding: 20mm 4mm 20mm 4mm; /* ustten 2cm, alttan 2cm (yirtma payi) */
+    overflow: hidden;
   }
   pre {
     font-family: "Courier New", Courier, monospace;
@@ -114,7 +138,7 @@ export function buildReceiptHtml(tx: Transaction): string {
 </style>
 </head>
 <body>
-<pre>${esc(text)}</pre>
+  <div class="strip"><pre>${esc(text)}</pre></div>
 </body>
 </html>`;
 }
