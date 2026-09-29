@@ -117,28 +117,19 @@ export function buildReceiptHtml(tx: Transaction): string {
 <meta charset="utf-8" />
 <title>HESAP PUSULASI</title>
 <style>
-  /* A4 kalsa bile sayfa yüksekliğini içeriğe zorluyoruz */
-  @page { 
-    size: 76mm auto; 
-    margin: 0; 
-  }
-  html, body { 
-    margin: 0; 
-    padding: 0; 
-    background: #fff; 
-    width: 76mm;
-  }
+  @page
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #fff; }
   .strip {
-    width: 76mm;
-    /* Üst padding'i SIFIRLA! Önceki kodundaki 20mm üst padding fişi aşağı itiyordu */
-    padding: 0mm 2mm 10mm 2mm; 
-    overflow: hidden;
+    width: 70mm;
+    padding: 20mm  20mm; /* ustten 2cm, alttan 2cm (yirtma payi) */
+    
   }
   pre {
-    font-family: "Courier New", Courier, monospace;
-    font-size: 9.5pt;
-    font-weight: 700;
-    line-height: 1.2;
+    
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.6;
     white-space: pre;
     color: #000;
     -webkit-print-color-adjust: exact;
