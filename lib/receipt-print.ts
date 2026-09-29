@@ -1,151 +1,118 @@
 'use client';
 
 import { Transaction } from './types';
-
-/**
- * Turkce karakterleri ASCII esdegerine cevirir.
- */
-function ascii(s: string): string {
-  return s
-    .replace(/ğ/g, 'g').replace(/Ğ/g, 'G')
-    .replace(/ü/g, 'u').replace(/Ü/g, 'U')
-    .replace(/ş/g, 's').replace(/Ş/g, 'S')
-    .replace(/ı/g, 'i').replace(/İ/g, 'I')
-    .replace(/ç/g, 'c').replace(/Ç/g, 'C')
-    .replace(/ö/g, 'o').replace(/Ö/g, 'O');
-}
-
-function money(n: number): string {
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(n);
-}
-
-function rate(n: number): string {
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 4,
-    maximumFractionDigits: 4
-  }).format(n);
-}
-
-// Satir genisligi (karakter). 70mm dot-matrix/termal serit icin guvenli deger.
-const W = 40;
-// Kolon genislikleri: 16 (miktar) + 11 (kur) + 13 (TL karsiligi) = 40
-const C1 = 16;
-const C2 = 11;
-const C3 = 13;
-
-function center(s: string): string {
-  const pad = Math.max(0, Math.floor((W - s.length) / 2));
-  return ' '.repeat(pad) + s;
-}
-
-/**
- * Fisi SAF MONOSPACE METIN olarak uretir (nokta vuruslu / dot-matrix
- * yazicilarin ana dili). Kolon hizasi karakter bosluklariyla kurulur;
- * HTML tablo veya CSS layout kullanilmaz.
- */
-function buildReceiptText(tx: Transaction): string {
-  const kurBaslik = tx.type === 'BUY' ? 'Alis Kuru' : 'Satis Kuru';
-  const sep = '-'.repeat(W);
-
-  const d = new Date(tx.date);
-  const tarih = `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
-  const saat = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
-
-  let rows: { code: string; amount: number; rate: number; total: number }[];
-  if (tx.type === 'CROSS' && tx.cross) {
-    rows = [
-      {
-        code: tx.cross.fromCode,
-        amount: tx.cross.fromAmount,
-        rate: tx.cross.fromRate,
-        total: tx.cross.fromAmount * tx.cross.fromRate
-      }
-    ];
-  } else if (Array.isArray(tx.items)) {
-    rows = tx.items.map((it) => ({
-      code: it.code,
-      amount: it.amount,
-      rate: it.rate,
-      total: it.totalTRY
-    }));
-  } else {
-    rows = [];
-  }
-
-  const header =
-    'Doviz Miktari'.padEnd(C1) + kurBaslik.padStart(C2) + 'TL Karsiligi'.padStart(C3);
-
-  const lines = rows.map(
-    (r) =>
-      `${money(r.amount)} ${ascii(r.code)}`.padEnd(C1) +
-      rate(r.rate).padStart(C2) +
-      money(r.total).padStart(C3)
-  );
-
-  // Guvenlik: items bos gelirse fis asla bos cikmasin
-  if (lines.length === 0) {
-    lines.push('TL Toplam'.padEnd(C1 + C2) + money(tx.grandTotalTRY || 0).padStart(C3));
-  }
-
-  return [
-    `Tarih: ${tarih}   Saat: ${saat}`,
-    center('HESAP PUSULASI'),
-    sep,
-    header,
-    sep,
-    ...lines
-  ].join('\n');
-}
+import { formatCurrency, formatNumber, formatRate, numberToTurkishText } from './currency';
 
 const esc = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 /**
- * A4 sayfa uzerinde sol-ust 70mm serit olarak basar.
- * (Yazici surucusunde rulo genisligi ayari olmadigi icin A4 seciliyor;
- * yazici icerik bitince durur, 2cm alt bosluk yirtma payi birakir.)
+ * 70x100mm tek sayfa fişi, tamamen bağımsız bir HTML belgesi olarak üretir.
+ * Uygulamanın hiçbir CSS'i bu belgeye karışmaz.
  */
 export function buildReceiptHtml(tx: Transaction): string {
-  const text = buildReceiptText(tx);
+  const date = new Date(tx.date).toLocaleString('tr-TR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+
+
+  let itemsHtml = '';
+  if (tx.type === 'CROSS' && tx.cross) {
+    itemsHtml = `
+      <div class="row bold"><span>VERİLEN:</span><span>${formatNumber(tx.cross.fromAmount)} ${esc(tx.cross.fromCode)}</span></div>
+      <div class="row small"><span>Kur: ${formatRate(tx.cross.fromRate)} TL</span><span></span></div>
+      <div class="row bold"><span>ALINAN:</span><span>${formatNumber(tx.cross.toAmount)} ${esc(tx.cross.toCode)}</span></div>
+      <div class="row small"><span>Kur: ${formatRate(tx.cross.toRate)} TL</span><span>1 ${esc(tx.cross.fromCode)} = ${formatRate(tx.cross.crossRate)} ${esc(tx.cross.toCode)}</span></div>
+      <div class="row black big total"><span>İŞLEM DEĞERİ:</span><span>${formatCurrency(tx.grandTotalTRY, 'TRY')}</span></div>`;
+  } else {
+    itemsHtml =
+      tx.items
+        .map(
+          (item) => `
+      <div class="row bold" style="font-size:10px"><span>${esc(item.code)} - ${esc(item.title)}</span><span>${formatNumber(item.amount)}</span></div>
+      <div class="row small"><span>Kur: ${formatRate(item.rate)}${item.isNegotiated ? ' (P)' : ''}</span><span class="bold" style="color:#000">${formatCurrency(item.totalTRY, 'TRY')}</span></div>`
+        )
+        .join('') +
+      `
+      <div class="row black big total"><span>GENEL TOPLAM:</span><span>${formatCurrency(tx.grandTotalTRY, 'TRY')}</span></div>`;
+  }
 
   return `<!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="utf-8" />
-<title>HESAP PUSULASI</title>
+<title>Fis ${esc(tx.id)}</title>
 <style>
-  @page
+  @page { size: 70mm 100mm; margin: 0; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { background: #fff; }
-  .strip {
+  body {
     width: 70mm;
-    padding: 20mm  20mm; /* ustten 2cm, alttan 2cm (yirtma payi) */
-    
-  }
-  pre {
-    
-    font-size: 12px;
-    font-weight: 400;
-    line-height: 1.6;
-    white-space: pre;
+    max-height: 100mm;
+    overflow: hidden;
+    padding: 1.5mm 3mm;
+    font-family: "Courier New", Courier, monospace;
     color: #000;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    font-size: 9px;
+    line-height: 1.3;
   }
+  .row { display: flex; justify-content: space-between; align-items: baseline; }
+  .center { text-align: center; }
+  .bold { font-weight: 700; }
+  .black { font-weight: 900; }
+  .big { font-size: 11px; }
+  .small { font-size: 8px; color: #444; }
+  .tiny { font-size: 7px; color: #444; }
+  .b { border-bottom: 1px dashed #666; padding-bottom: 4px; margin-bottom: 4px; }
+  .total { border-top: 1px dashed #666; margin-top: 2px; padding-top: 3px; }
+  .banner { background: #eee; border: 1px solid #999; text-align: center; font-weight: 700; font-size: 9px; padding: 3px 2px; margin: 3px 0; }
+  .sig { display: flex; gap: 8px; text-align: center; font-size: 8px; padding-top: 4px; }
+  .sig > div { flex: 1; }
+  .sig .line { height: 14px; border-bottom: 1px dotted #666; margin-top: 2px; }
 </style>
 </head>
 <body>
-  <div class="strip"><pre>${esc(text)}</pre></div>
+  <div class="center b">
+    <div class="banner">Fiyat Teklif Fişi</div>
+   
+    
+   
+  </div>
+
+  <div class="b" style="padding:4px 0">
+    <div class="row black" style="font-size:10px"><span>FİŞ NO:</span><span>${esc(tx.id)}</span></div>
+    <div class="row small"><span>TARİH:</span><span>${date}</span></div>
+    <div class="row small"><span>GİŞE:</span><span>${esc(tx.operator || 'Gişe 1')}</span></div>
+  </div>
+
+  
+
+  <div class="b" style="padding-bottom:4px">
+    ${itemsHtml}
+  </div>
+
+ 
+
+  <div class="sig b" style="padding-bottom:4px">
+    
+  </div>
+
+  <div class="center" style="padding-top:3px">
+    <div class="tiny">Parayı gişeden ayrılmadan sayarak teslim alınız. Bilgi fişidir.</div>
+    
+  </div>
 </body>
 </html>`;
 }
 
 /**
- * Fisi izole bir iframe belgesine yazip yalnizca o belgeyi yazdirir.
- * Uygulama DOM'u ve CSS'i yazdirmaya asla karismaz -> tek sayfa, tek fis.
+ * Fişi izole bir iframe belgesine yazıp yalnızca o belgeyi yazdırır.
+ * Uygulama DOM'u ve CSS'i yazdırmaya asla karışmaz -> tek sayfa, tek fiş.
  */
 export function printTransactionReceipt(tx: Transaction): void {
   const iframe = document.createElement('iframe');
